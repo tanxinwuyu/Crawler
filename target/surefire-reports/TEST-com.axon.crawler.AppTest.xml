@@ -26,7 +26,7 @@
     <property name="java.vm.specification.vendor" value="Oracle Corporation"/>
     <property name="user.variant" value=""/>
     <property name="os.name" value="Windows 7"/>
-    <property name="classworlds.conf" value="E:\workspace-j2ee_2015\.metadata\.plugins\org.eclipse.m2e.launching\launches\m2conf3661282109385077717.tmp"/>
+    <property name="classworlds.conf" value="E:\workspace-j2ee_2015\.metadata\.plugins\org.eclipse.m2e.launching\launches\m2conf3811550854178120245.tmp"/>
     <property name="sun.jnu.encoding" value="GBK"/>
     <property name="java.library.path" value="D:\jdk1.7.0_25\bin;C:\Windows\Sun\Java\bin;C:\Windows\system32;C:\Windows;D:/jdk1.7.0_25/bin/../jre/bin/server;D:/jdk1.7.0_25/bin/../jre/bin;D:/jdk1.7.0_25/bin/../jre/lib/amd64;D:\scala\bin;D:\jdk1.7.0_25\bin;E:\apache-maven-3.3.9\bin;D:\jdk1.7.0_25\bin;C:\Windows\system32;C:\Windows;C:\Windows\System32\Wbem;C:\Windows\System32\WindowsPowerShell\v1.0\;D:\Program Files (x86)\bin;D:\scala\bin;D:\Program Files (x86);E:\eclipse-jee-luna-R-win32-x86_64\eclipse-jee-luna-R-win32-x86_64;;."/>
     <property name="java.specification.name" value="Java Platform API Specification"/>

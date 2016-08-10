@@ -2,10 +2,8 @@ package com.axon.crawler;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileFilter;
 import java.io.FileReader;
 import java.io.IOException;
-import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -13,15 +11,11 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
-import java.util.TreeMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpEntity;
@@ -33,13 +27,11 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.util.EntityUtils;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
-import org.jsoup.select.Elements;
 
 import com.axon.crawler.bean.infoBean;
 import com.axon.mysql.MysqlUtils;
-import com.axon.mysql.WriteToMysql;
 
+@SuppressWarnings("deprecation")
 public class Crawler {
 	private static Log logger = LogFactory.getLog(Crawler.class);
 	private final static int DEFAULT_VALUE = 2 << 29;
@@ -54,24 +46,27 @@ public class Crawler {
 	/**
 	 * @param args
 	 */
-	public static void main(String[] args) {
-		File file = new File("/home/tagdata");
-		Crawler cw = new Crawler();
-		cw.getUrl(file);
-	}
-
+	/*
+	 * public static void main(String[] args) { File file = new
+	 * File("/home/sftpclient/file_backup");//"" Crawler cw = new Crawler();
+	 * cw.getUrl(file); }
+	 */
 	// 获取正确的url
 	public void getUrl(File fileDir) {
+		logger.info("开始获取文件");
 		FileReader fr = null;
 		BufferedReader bufr = null;
 		int count = 0;
-		// int count1 = 0;
+		int fileCount = 0;
 		Set<infoBean> set = new HashSet<infoBean>();
 		MyFileFilter fileFilter = new MyFileFilter();
 		File[] fileList = fileDir.listFiles();
+		logger.info("文件个数：" + fileList.length);
 		try {
 			for (File file : fileList) {
+				logger.info("文件名称为：" + file.getName());
 				if (file.isFile() && fileFilter.accept(file)) {
+					logger.info("符合标准的文件名称为：" + file.getName());
 					fr = new FileReader(file);
 					bufr = new BufferedReader(fr);
 					String line = null;
@@ -103,15 +98,19 @@ public class Crawler {
 						set.add(info);
 						System.out.println("文件总条数：" + count);
 					}
+				} else {
+					continue;
 				}
 				if (count % 10000 == 0) {
-					 accessUrl(set);
-					set = new HashSet<infoBean>();
+					accessUrl(set);
+					set.clear();
 				}
 				logger.info(count);
 				logger.info("访问最后剩下的url");
 			}
-		accessUrl(set);
+			if (set.size() != 0) {
+				accessUrl(set);
+			}
 		} catch (IOException e) {
 			logger.info("io异常" + e);
 		}
@@ -178,8 +177,8 @@ public class Crawler {
 
 	// 向mysql中插入数据
 	private void insertSQL(List<infoBean> doc) {
-		String sql = "insert into weixinText(date,phone,biz,url,infomation)values(?,?,?,?,?)";
-		WriteToMysql wtm = new WriteToMysql();
+		String sql = "insert into weixintext(date,phone,biz,url,infomation)values(?,?,?,?,?)";
+		MysqlUtils wtm = new MysqlUtils();
 		wtm.insertSQL(doc, sql);
 	}
 
@@ -281,16 +280,6 @@ public class Crawler {
 		return html;
 	}
 
-	/*
-	 * public TreeMap<String, String> getConfig() { InputStream in =
-	 * this.getClass().getResourceAsStream( "/META-INF/config.properties");
-	 * List<String> list = null; TreeMap<String, String> tm = new
-	 * TreeMap<String, String>(); try { list = IOUtils.readLines(in); for
-	 * (String s : list) { String[] str = s.split("="); tm.put(str[0], str[1]);
-	 * } } catch (IOException e) {
-	 * 
-	 * e.printStackTrace(); } return tm; }
-	 */
 	// 只用于计算hash值
 	public static class BloomFiler {
 		private int cap;
@@ -334,15 +323,17 @@ public class Crawler {
 
 	// 已经入库的biz号把他们映射到bitset中
 	public void init() {
+		logger.info("开始获取bloomfilter的位数据");
 		setBitset();
 		String sql = "SELECT DISTINCT biz from weixintext";
 		MysqlUtils mysqlUtil = new MysqlUtils();
 		Connection conn = mysqlUtil.connectionDB();
 		PreparedStatement preparedStatement = null;
-		// List<String> list = new ArrayList<String>();
+		// List<String> list = new ArrayList<String>();\ResultSet rs
+		ResultSet rs = null;
 		try {
 			preparedStatement = conn.prepareStatement(sql);
-			ResultSet rs = preparedStatement.executeQuery();
+			rs = preparedStatement.executeQuery();
 			if (null == rs) {
 				return;
 			} else {
@@ -352,7 +343,16 @@ public class Crawler {
 			}
 		} catch (SQLException e) {
 			logger.error(e);
+		} finally {
+			try {
+				rs.close();
+				conn.close();
+			} catch (SQLException e) {
+				logger.info("关闭异常", e);
+			}
+
 		}
+
 	}
 
 	// 给bitset设置值

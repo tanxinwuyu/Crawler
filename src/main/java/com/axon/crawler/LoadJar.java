@@ -15,7 +15,7 @@ public class LoadJar {
 		loadJarList(libDir, urlList);
 		URLClassLoader classLoader = new URLClassLoader(urlList.toArray(new URL[0]), LoadJar.class.getClassLoader());
 		Thread.currentThread().setContextClassLoader(classLoader);// 设置主线程的类加载器
-		File file = new File("/home/tagdata");
+		File file = new File("/home/sftpclient/file_backup");
 		Crawler cw = new Crawler();
 		cw.getUrl(file);
 	}

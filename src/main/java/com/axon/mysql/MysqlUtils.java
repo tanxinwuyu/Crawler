@@ -1,51 +1,44 @@
 package com.axon.mysql;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
 import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
-import org.apache.log4j.Logger;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
-
-
-
-
-import com.axon.crawler.bean.ResultBean;
+import com.axon.crawler.bean.infoBean;
 import com.mysql.jdbc.Connection;
+import com.mysql.jdbc.PreparedStatement;
 
+/**
+ * Hello world!
+ *
+ */
 public class MysqlUtils {
-	private static Logger logger = Logger.getLogger(MysqlUtils.class);
-	private final String username = "probe";
-	private final String password = "probe@2011";
-	private final String url = "jdbc:mysql://192.200.196.14:3306/weixin";
 
-	// private Connection conn = null;
+	private static Log logger = LogFactory.getLog(MysqlUtils.class);
+	private Connection conn;
+	private final String url = "jdbc:mysql://192.200.196.14:3306/weixin";//
+	private final String username = "probe";// "";
+	private final String password = "probe@2011";// "";
 
-	public MysqlUtils() {
-		// conn = connectionDB();
-	}
+	// private String sql =
+	// "insert into icase(date,phone,host,path)values(?,?,?,?)";
+
+	// 在创建对象的时候就初始化一个连接对象
+	
 
 	@SuppressWarnings("finally")
 	public Connection connectionDB() {
-		Connection conn = null;
+		Connection conn1 = null;
 		try {
 			Class.forName("com.mysql.jdbc.Driver");
 			conn = (Connection) DriverManager.getConnection(url, username,
 					password);
 			// 关闭事务自动提交
 			conn.setAutoCommit(false);
-			System.out.println("连接数据库成功");
+			logger.info("数据库连接成功！！！！！！");
 		} catch (Exception e) {
 			logger.error(e);
 		} finally {
@@ -53,131 +46,67 @@ public class MysqlUtils {
 		}
 	}
 
-	
-	public void getData(File file) {
-		FileReader fr = null;
-		BufferedReader bufr = null;
-		List<ResultBean> awbList = null;//new ArrayList<AddWeiBean>();
-		int count1 = 0;
-		try {
-			fr = new FileReader(file);
-			bufr = new BufferedReader(fr);
-			String line = null;
-			//int count1 = 0;
-			awbList = new ArrayList<ResultBean>();
-			HashMap<String, String> bizTagInfo = getBizInfo();
-			while ((line = bufr.readLine()) != null) {
-				   // str[tel,time,biz]
-				   count1++;
-				   String[] str = line.split("\t");
-				   ResultBean info = new ResultBean();
-				   String tag = bizTagInfo.get(str[2]);
-					if (null == tag) {
-						info.setTag("-1");
-					} else {
-						info.setTag(tag);
-					}
-					info.setTel(str[0]);
-					awbList.add(info);
-					logger.info(count1);
-					logger.info("===============================================================");
-					if(awbList.size()%100000==0){
-						insert(awbList);
-						awbList = new  ArrayList<ResultBean>();
-					}
-			}
-		insert(awbList);
-		logger.info("总共多少条数据："+count1);
-		} catch (Exception e) {
-			logger.error(e);
-		}finally{
-			try {
-				bufr.close();
-			} catch (IOException e) {
-				logger.error(e);
-			}
-		}
-		
-	}
-
-	// 从数据库中获取biz号以及tag的对应
-	public HashMap<String, String> getBizInfo() {
-		HashMap<String, String> bizInfo = new HashMap<String, String>();
-		String sql = "SELECT DISTINCT biz,tag from weixininfo";
+	// 从文件中读取数据存到读取数据
+	@SuppressWarnings("resource")
+	/*
+	 * public void getDataFromFile() throws SQLException { InputStream in =
+	 * this.getClass().getResourceAsStream("/aa.txt"); List<String> line = null;
+	 * PreparedStatement pStatement = (PreparedStatement) conn
+	 * .prepareStatement(sql); try { line = IOUtils.readLines(in); int count =
+	 * 0; for (String s : line) { String[] str = s.split("\\s+"); //
+	 * "insert into icase(date,phone,host,path)values(?,?,?)";
+	 * conn.setAutoCommit(false);// 设置数据手动提交，自己管理事务 count++;
+	 * pStatement.setString(1, str[0].trim() + " " + str[1].trim());
+	 * pStatement.setString(2, str[2].trim()); pStatement.setString(3,
+	 * str[3].trim()); pStatement.setString(4, str[4].trim());
+	 * pStatement.addBatch(); if (count % 5000 == 0) {// 当增加了500个批处理的时候再提交
+	 * pStatement.executeBatch();// 执行批处理 conn.commit();// 提交 conn.close();//
+	 * 关闭数据库 conn = connectionDB();// 重新获取一次连接 conn.setAutoCommit(false);
+	 * pStatement = (PreparedStatement) conn.prepareStatement(sql); } } if
+	 * (count % 5000 != 0) {// while循环外的判断，为了防止上面判断后剩下最后少于500条的数据没有被插入到数据库
+	 * pStatement.executeBatch(); conn.commit(); } pStatement.close();
+	 * conn.close(); pStatement.close(); } catch (IOException e) {
+	 * logger.error(e); } }
+	 */
+	// 对数据进行批处理
+	// "insert into weixininfo(date,phone,biz,url,instruction)values(?,?,?,?,?)"";
+	public void insertSQL(List<infoBean> list, String sql) {
+		Connection conn1 = connectionDB();
+		logger.info("插入的bean大小为：" + list.size());
 		PreparedStatement pStatement = null;
-		Connection conn = connectionDB();
+		infoBean info = null;
+		// conn.setCharacterEncoding("utf-8");
 		try {
-			pStatement = conn.prepareStatement(sql);
-			ResultSet rs = pStatement.executeQuery();
-			while (rs.next()) {
-				String biz = rs.getString(1);
-				String tag = rs.getString(2);
-				bizInfo.put(biz, tag);
-			}
-		} catch (SQLException e) {
-			logger.error(e);
-		} finally {
-			try {
-				pStatement.close();
-				conn.close();
-			} catch (SQLException e) {
-				logger.error(e);
-			}
-		}
-		return bizInfo;
-	}
-
-	public void matchTag(HashMap<String, List<ResultBean>> hmFre) {
-		HashMap<String, String> bizTagInfo = getBizInfo();
-		Set<Map.Entry<String, List<ResultBean>>> set = hmFre.entrySet();
-		List<ResultBean> AllList = new ArrayList<ResultBean>();
-		for (Iterator<Map.Entry<String, List<ResultBean>>> it = set.iterator(); it
-				.hasNext();) {
-			Map.Entry<String, List<ResultBean>> me = it.next();
-			//String tel = me.getKey();
-			List<ResultBean> awList = me.getValue();
-			for (int i = 0; i < awList.size(); i++) {
-				ResultBean awb = awList.get(i);
-				String tag = bizTagInfo.get(awb.getBiz());
-				if (null == tag) {
-					awb.setTag("-1");
-				} else {
-					awb.setTag(tag);
-				}
-			}
-			AllList.addAll(awList);
-			// if(AllList.size()>20000)return AllList;
-		}
-
-		insert(AllList);
-
-	}
-
-	public void insert(List<ResultBean> list) {
-		logger.info("开始插入数据");
-		String sql = "insert into weixintag (tel,tag)VALUES(?,?)";
-		PreparedStatement pStatement = null;
-		Connection conn = connectionDB();
-		try {
-			@SuppressWarnings("unused")
 			int count = 0;
-			pStatement = conn.prepareStatement(sql);
-			for (ResultBean awb : list) {
+			pStatement = (PreparedStatement) conn1.prepareStatement(sql);
+			for (int i = 0; i < list.size(); i++) {
 				count++;
-				pStatement.setString(1, awb.getTel());
-				pStatement.setString(2, awb.getTag());
+				info = list.get(i);
+				logger.info("电话号码：" + info.getPhone() + "+++++url:"
+						+ info.getUrl() + "+++++getInstruction:"
+						+ info.getInstruction());
+				// info= list.get(i);
+				conn1.setAutoCommit(false);// 设置数据手动提交，自己管理事务
+				pStatement.setString(1, info.getDate().trim());
+				pStatement.setString(2, info.getPhone().trim());
+				pStatement.setString(3, info.getBiz().trim());
+				pStatement.setString(4, info.getUrl().trim());
+				pStatement.setString(5, info.getInstruction());
 				pStatement.addBatch();
+				// pStatement.execute();
 			}
+			logger.info("数量" + count);
 			pStatement.executeBatch();
-			conn.commit();
+			conn1.commit();
 			pStatement.close();
-			conn.close();
-			conn = connectionDB();
-			logger.info("插入结束");
+			conn1.close();
+			logger.info("插入的bean大小为：" + list.size());
+			logger.info("结束插入");
 		} catch (SQLException e) {
+			logger.error("+++++url:" + info.getUrl() + "Instruction::::"
+					+ info.getInstruction());
 			logger.error(e);
+			System.exit(0);
 		}
-
 	}
-
 }

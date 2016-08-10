@@ -2,3 +2,13 @@
 09:37:29,249  INFO Crawler:112- 访问最后剩下的url
 09:38:49,859  INFO Crawler:111- 0
 09:38:50,241  INFO Crawler:112- 访问最后剩下的url
+15:22:12,561  INFO Crawler:320- 开始获取bloomfilter的位数据
+15:23:55,878  INFO Crawler:320- 开始获取bloomfilter的位数据
+15:23:56,181  INFO MysqlUtils:43- 数据库连接成功！！！！！！
+15:24:01,025  INFO MysqlUtils:43- 数据库连接成功！！！！！！
+15:24:39,219  INFO Crawler:320- 开始获取bloomfilter的位数据
+15:24:39,533  INFO MysqlUtils:43- 数据库连接成功！！！！！！
+15:25:41,104  INFO Crawler:320- 开始获取bloomfilter的位数据
+15:25:44,588  INFO MysqlUtils:43- 数据库连接成功！！！！！！
+15:26:37,124  INFO Crawler:92- ****************************************************************************************************************
+15:26:37,475  INFO Crawler:93- infoBean [phone=118415200860227050, url=http://mp.weixin.qq.com/s?__biz=MzAxMDY1NTM3MA==&mid=2651910675&idx=1&sn=61449fa5261f8c4dec70dbdcacabf73c&scene=0&key=8dcebf9e179c9f3a8a3f9fc7595d5c00cb4d53b9775cf3ac591c8d66144f32c3dcd6d598de817ba9dabed6976644524d, biz=MzAxMDY1NTM3MA==, name=null, instruction=null, date=20160802095048, tag=null, doc=null]
