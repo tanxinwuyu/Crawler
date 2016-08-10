@@ -26,9 +26,9 @@ import com.mysql.jdbc.Connection;
 
 public class MysqlUtils {
 	private static Logger logger = Logger.getLogger(MysqlUtils.class);
-	private final String username = "root";
-	private final String password = "root123";
-	private final String url = "jdbc:mysql://localhost:3306/weixin";
+	private final String username = "probe";
+	private final String password = "probe@2011";
+	private final String url = "jdbc:mysql://192.200.196.14:3306/weixin";
 
 	// private Connection conn = null;
 

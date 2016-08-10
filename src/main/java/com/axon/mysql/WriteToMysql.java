@@ -22,9 +22,9 @@ public class WriteToMysql {
 
 	private static Log logger = LogFactory.getLog(WriteToMysql.class);
 	private Connection conn = null;
-	private final String url = "jdbc:mysql://localhost:3306/weixin";
-	private final String username = "root";
-	private final String password = "root123";
+	private final String url = "jdbc:mysql://192.200.196.14:3306/weixin";
+	private final String username = "probe";
+	private final String password = "probe@2011";
     private String sql = "insert into icase(date,phone,host,path)values(?,?,?,?)";
 
 	// 在创建对象的时候就初始化一个连接对象
